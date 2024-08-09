@@ -4,24 +4,15 @@
 
 package frc.robot;
 
-import java.util.function.Supplier;
-
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest.SysIdSwerveTranslation;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.auto.DriveToPositionCommand;
 import frc.robot.auto.testAuto;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -54,22 +45,24 @@ public class RobotContainer {
 
   private void configureBindings() {
     
+    
     drivetrain.setDefaultCommand(
        // Drivetrain will execute this command periodically
+       
         drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with
-                                   
-        // negative Y (forward)
+                                                                                           // negative Y (forward)
             .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            
+            
             
         ));
 
     
-    
     joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
     joystick.b().whileTrue(drivetrain
         .applyRequest(() -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
-    //joystick.x().whileTrue(drivetrain.applyRequest(drivetrain.getAutoCommand(drivetrain, Constants.Trajectorys.sCurveTrajectory2)));
+    joystick.x().whileTrue(new DriveToPositionCommand(drivetrain, ()-> new Pose2d(2, 3, new Rotation2d(0)), true)); 
 
     
     /* 

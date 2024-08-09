@@ -4,26 +4,17 @@
 
 package frc.robot.auto;
 
-import java.util.List;
-
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.Constants;
-import frc.robot.generated.TunerConstants;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class testAuto extends SequentialCommandGroup {
+  SwerveControllerCommand sCurve;
   CommandSwerveDrivetrain drivetrain;
   /** Creates a new testAuto. */
   public testAuto(CommandSwerveDrivetrain m_Drivetrain) {
@@ -34,9 +25,9 @@ public class testAuto extends SequentialCommandGroup {
     Trajectory trajectory = Constants.Trajectorys.sCurveTrajectory;
         
     //pass the auto and the drivebase into a factory function
-    SwerveControllerCommand sCurve = drivetrain.getAutoCommand(drivetrain, trajectory);
+     sCurve = drivetrain.getAutoCommand(trajectory);
 
-    SwerveControllerCommand rSCurve = drivetrain.getAutoCommand(drivetrain, Constants.Trajectorys.rSCurveTrajectory);
+    SwerveControllerCommand rSCurve = drivetrain.getAutoCommand(Constants.Trajectorys.rSCurveTrajectory);
 
             
 
@@ -44,5 +35,7 @@ public class testAuto extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());        
     addCommands(sCurve,rSCurve);
     
+    
   }
+
 }

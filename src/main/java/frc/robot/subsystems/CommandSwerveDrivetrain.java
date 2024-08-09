@@ -6,6 +6,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
@@ -14,6 +15,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
@@ -35,6 +37,15 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+
+    public final SwerveRequest.FieldCentric closedLoop = new SwerveRequest.FieldCentric()
+            .withDriveRequestType(DriveRequestType.Velocity)
+            .withSteerRequestType(SteerRequestType.MotionMagicExpo);
+
+    
+    public final SwerveRequest.ApplyChassisSpeeds stopped = new SwerveRequest.ApplyChassisSpeeds()
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
+            .withSteerRequestType(SteerRequestType.MotionMagicExpo);
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private final Rotation2d BlueAlliancePerspectiveRotation = Rotation2d.fromDegrees(0);
@@ -58,7 +69,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
         Command command = run(() -> this.setControl(requestSupplier.get()));
+        this.setControl(m_requestToApply);
+        
         command.addRequirements(this);
+
+        
+                
         return command;
     }
 
@@ -96,20 +112,32 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     //factory for returning swerve auto commands
-    public SwerveControllerCommand getAutoCommand(CommandSwerveDrivetrain drivebase, Trajectory trajectory){
+    public SwerveControllerCommand getAutoCommand(Trajectory trajectory){
 
         //need to allow continues movement so the  module actually works
         ProfiledPIDController thetaController = Constants.AutoConstants.thetaController;
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
    
-        return new SwerveControllerCommand(trajectory, drivebase::getPose, Constants.Swerve.swerveKinematics,
+        return new SwerveControllerCommand(trajectory, this::getPose, Constants.Swerve.swerveKinematics,
          new HolonomicDriveController(
                 new PIDController(Constants.AutoConstants.kPXController, 0, 0),
                 new PIDController(Constants.AutoConstants.kPYController, 0, 0),
                 thetaController), 
-        drivebase::setModuleStates,
-        drivebase);
+        this::setModuleStates,
+        this);
         
+    }
+
+    public ChassisSpeeds getFieldRelativeChassisSpeeds() {
+        return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeChassisSpeeds(), getRotation());
+    }
+
+    public Rotation2d getRotation() {
+        return getPose().getRotation();
+    }
+
+    public ChassisSpeeds getRobotRelativeChassisSpeeds() {
+        return m_kinematics.toChassisSpeeds(getState().ModuleStates);
     }
 
     @Override
