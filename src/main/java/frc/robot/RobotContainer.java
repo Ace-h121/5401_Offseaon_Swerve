@@ -62,7 +62,7 @@ public class RobotContainer {
     joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
     joystick.b().whileTrue(drivetrain
         .applyRequest(() -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
-    joystick.x().whileTrue(new DriveToPositionCommand(drivetrain, ()-> new Pose2d(2, 3, new Rotation2d(0)), true)); 
+    joystick.x().whileTrue(new DriveToPositionCommand(drivetrain, ()-> new Pose2d(2, 3, new Rotation2d(0)), false)); 
 
     
     /* 

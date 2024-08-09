@@ -21,8 +21,8 @@ public class DriveToPositionCommand extends Command {
     private final ProfiledPIDController driveController = new ProfiledPIDController(5.5, 0, 0, driveConstraints);
     private final ProfiledPIDController omegaController = new ProfiledPIDController(9, 0, 0, omegaConstraints);
 
-    private final SlewRateLimiter xSlewRater = new SlewRateLimiter(5);
-    private final SlewRateLimiter ySlewRater = new SlewRateLimiter(5);
+    private final SlewRateLimiter xSlewRater = new SlewRateLimiter(2);
+    private final SlewRateLimiter ySlewRater = new SlewRateLimiter(2);
 
     private final boolean finishes;
 
