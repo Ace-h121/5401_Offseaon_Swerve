@@ -12,14 +12,15 @@ import java.util.function.Supplier;
 
 public class DriveToPositionCommand extends Command {
     private static final TrapezoidProfile.Constraints driveConstraints = new TrapezoidProfile.Constraints(3, 3);
-    private static final TrapezoidProfile.Constraints omegaConstraints = new TrapezoidProfile.Constraints(Math.PI*3, Math.PI*4);
+    private static final TrapezoidProfile.Constraints omegaConstraints = new TrapezoidProfile.Constraints(Math.PI * 3, Math.PI * 4);
 
     private final CommandSwerveDrivetrain swerveDriveSubsystem;
 
     private Supplier<Pose2d> targetPoseSupplier;
 
     private final ProfiledPIDController driveController = new ProfiledPIDController(5.5, 0, 0, driveConstraints);
-    private final ProfiledPIDController omegaController = new ProfiledPIDController(9, 0, 0, omegaConstraints);
+    private final ProfiledPIDController omegaController = new ProfiledPIDController(6, 0, 0, omegaConstraints);
+
 
     private final SlewRateLimiter xSlewRater = new SlewRateLimiter(2);
     private final SlewRateLimiter ySlewRater = new SlewRateLimiter(2);
@@ -39,8 +40,8 @@ public class DriveToPositionCommand extends Command {
         this.targetPoseSupplier = targetPoseSupplier;
         this.finishes = finishes;
 
-        driveController.setTolerance(0.5);
-        omegaController.setTolerance(Units.degreesToRadians(10));
+        driveController.setTolerance(0.01);
+        omegaController.setTolerance(Units.degreesToRadians(1));
         omegaController.enableContinuousInput(-Math.PI, Math.PI);
 
         addRequirements(swerveDriveSubsystem);
@@ -56,8 +57,8 @@ public class DriveToPositionCommand extends Command {
         this(swerveDriveSubsystem, () -> targetPose, finishes);
     }
 
-    public DriveToPositionCommand(CommandSwerveDrivetrain swerveDriveSubsystem, Pose2d targetPose) {
-        this(swerveDriveSubsystem, targetPose, true);
+    public DriveToPositionCommand(CommandSwerveDrivetrain swerveDriveSubsystem, Supplier<Pose2d> supplier) {
+        this(swerveDriveSubsystem, supplier, true);
     }
 
     @Override
