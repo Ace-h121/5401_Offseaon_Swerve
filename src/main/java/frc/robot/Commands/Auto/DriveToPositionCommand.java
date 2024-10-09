@@ -1,4 +1,4 @@
-package frc.robot.auto;
+package frc.robot.Commands.Auto;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
